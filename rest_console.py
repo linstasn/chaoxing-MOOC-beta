@@ -1,46 +1,68 @@
 # coding:utf-8
 from flask import Flask
-from console_erya.config_dev import ip, port
+from console_erya.config import ip, port
 from flask_restful import reqparse, Api, Resource
 from console_erya.global_var import globalvar
 from console_erya import console
+from flask_cors import *
+import shutil
+import os
+import time
+import re
 
+r = '(?<!/)&'
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 api = Api(app)
+
 __author__ = 'bankroft'
 
 
 class Main(Resource):
+
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('search_school', type=str, location='args')
         parser.add_argument('instance_name', type=str, location='args')
         parser.add_argument('get_course', type=str, location='args')
+        parser.add_argument('get_ver_code', type=bool, location='args')
         parser.add_argument('author', type=str, location='args')
         args = parser.parse_args()
         if args['author']:
-            return {'author': __author__}
+            return [{'author': __author__}]
         if args['instance_name']:
             con = globalvar.get(args['instance_name'])
             if con:
                 if args['search_school']:
                     if not con.status['search_school']:
                         tmp = con.search_school(args['search_school'])
-                        return {'status': 100, 'message': '', 'data': tmp}
+                        return [{'status': 100, 'message': '', 'data': tmp}]
                     else:
-                        return {'status': 404, 'message': '已选择学校'}
+                        return [{'status': 404, 'message': '已搜索学校'}]
+                elif args['get_ver_code'] == False:
+                    if con.status['select_school'] and not con.status['login']:
+                        tmp = con.get_login_ver_code()
+                        return [{'status': 100, 'message': '先登陆', 'data': tmp}]
+                    else:
+                        return [{'status': 404, 'message': '步骤错误'}]
+                elif args['get_ver_code']:
+                    if con.status['select_school'] and not con.status['login']:
+                        tmp = con.get_login_ver_code(refresh=True)
+                        return [{'status': 100, 'message': '先登陆', 'data': tmp}]
+                    else:
+                        return [{'status': 404, 'message': '步骤错误'}]
                 elif args['get_course']:
                     if con.status['login']:
                         tmp = con.get_course()
-                        return {'status': 100, 'message': '', 'data': tmp}
+                        return [{'status': 100, 'message': '', 'data': tmp}]
                     else:
-                        return {'status': 404, 'message': '先登陆'}
+                        return [{'status': 404, 'message': '先登陆'}]
                 else:
-                    return {'status': 404, 'message': '参数错误'}
+                    return [{'status': 404, 'message': '参数错误'}]
             else:
-                return {'status': 404, 'message': '实例不存在'}
+                return [{'status': 404, 'message': '实例不存在'}]
         else:
-            return {'status': 404, 'message': '参数错误'}
+            return [{'status': 404, 'message': '参数错误'}]
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -53,43 +75,66 @@ class Main(Resource):
         parser.add_argument('init', type=str, help='添加实例名称', location='form')
         args = parser.parse_args()
         if args['init']:
+            print(1)
             if globalvar.get(args['init']):
-                return {'status': 404, 'message': '实例名称重复'}
-            else:
-                globalvar.add({args['init']: console.Console()})
-            return {'status': 100, 'message': ''}
+                con = globalvar.get(args['instance_name'])
+                con.quit()
+            globalvar.add({args['init']: console.Console()})
+            return [{'status': 100, 'message': ''}]
         if args['instance_name']:
             con = globalvar.get(args['instance_name'])
             if con:
                 if args['select_school'] is not None:
                     if con.status['search_school']:
                         # 先搜索
-                        return {'status': 100, 'message': '', 'data': con.select_school(args['select_school'])}
+                        return [{'status': 100, 'message': '', 'data': con.select_school(args['select_school'])}]
                     else:
                         # 未搜索就选择学校
-                        return {'status': 404, 'message': '先搜索学校'}
+                        return [{'status': 404, 'message': '先搜索学校'}]
                 elif args['student_num'] and args['pwd'] and args['ver_code']:
                     if con.status['select_school']:
                         tmp = con.login(args['student_num'], args['pwd'], args['ver_code'])
                         if tmp[1]:
-                            return {'status': 100, 'message': '', 'data': tmp[0]}
+                            return [{'status': 100, 'message': '', 'data': tmp[0]}]
                         else:
-                            return {'status': 404, 'message': tmp[0]}
+                            return [{'status': 404, 'message': tmp[0]}]
                     else:
-                        return {'status': 404, 'message': '先选择学校'}
+                        return [{'status': 404, 'message': '先选择学校'}]
                 elif args['browse_watch'] is not None:
-                    return {'status': 100, 'message': '', 'data': con.browse_watch(args['browse_watch'])}
+                    return [{'status': 100, 'message': '', 'data': con.browse_watch(args['browse_watch'])}]
                 else:
-                    return {'status': 404, 'message': '参数错误'}
+                    return [{'status': 404, 'message': '参数错误'}]
             else:
-                return {'status': 404, 'message': '实例不存在'}
+                return [{'status': 404, 'message': '实例不存在'}]
         else:
-            return {'status': 404, 'message': '参数错误'}
+            return [{'status': 404, 'message': '参数错误'}]
 
 
 class GetInfo(Resource):
+
     def get(self):
-        pass
+        parser = reqparse.RequestParser()
+        parser.add_argument('start', type=int, location='args')
+        parser.add_argument('status', type=str, location='args')
+        args = parser.parse_args()
+        if args['status']:
+            return [{'status': 100, 'message': '正在运行'}]
+        if args['start']:
+            start = int(args['start'])
+            data = []
+            shutil.copyfile('erya.log', 'erya.log.tmp')
+            with open('erya.log.tmp', encoding='utf-8') as f:
+                for x in f.readlines():
+                    try:
+                        t = time.mktime(time.strptime(x.split(',')[0], '%Y-%m-%d %H:%M:%S'))
+                        if t > start:
+                            data.append(re.split(r, x)[1:])
+                    except:
+                        continue
+            os.remove('erya.log.tmp')
+            return [{'status': 100, 'message': '', 'data': data}]
+        else:
+            return [{'status': 404, 'message': '参数错误'}]
 
 
 api.add_resource(Main, '/rest_console')

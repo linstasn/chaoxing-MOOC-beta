@@ -2,12 +2,10 @@
 import time
 from PIL import Image
 from selenium import webdriver, common
-from .config_dev import *
-from .config_user import chrome_drive_path
+from .config import *
 import os
 from .automaticcompletion import AutomaticCompletion
-from random import sample
-import string
+from base64 import b64encode
 
 
 class Console:
@@ -19,6 +17,7 @@ class Console:
         'get_course': 0,
         'browser_watch': 0
     }
+    __base64_png = 'data:image/png;base64,'
     __select_school_result = []
     __course = []
     __course_lesson = []
@@ -43,7 +42,6 @@ class Console:
 
     def quit(self):
         self.driver.quit()
-        del self
 
     def login(self, student_num, password, code):
         self.operate(login_code['type'], login_code['string'], 'send_key', code)
@@ -91,7 +89,6 @@ class Console:
         """
         filename = 'vercode.png'
         if refresh:
-            filename = ''.join(sample(string.ascii_letters, 8)) + '.png'
             self.operate(refresh_code['type'], refresh_code['string'], 'click')
         self.driver.get_screenshot_as_file('code.png')  # 保存登陆界面截图
         a = self.driver.find_element_by_id('numVerCode')  # 定位验证码
@@ -102,11 +99,13 @@ class Console:
         im = Image.open('code.png')
         im = im.crop((l, t, r, b))
         im.save(os.path.join(path_vercode, filename))
+        result = self.__base64_png+b64encode(open(os.path.join(path_vercode, filename), 'rb').read()).decode()
         try:
             os.remove('code.png')
+            os.remove(os.path.join(path_vercode, filename))
         except OSError:
             pass
-        return filename
+        return result
 
     def get_course(self):
         self.__course = []
@@ -143,7 +142,7 @@ class Console:
         # 是否已完成
         complete_status = self.driver.find_elements(list_complete_status['type'], list_complete_status['string'])
         # 课时链接、课时名称、完成状态
-        for x, y, z in zip(self.driver.find_elements(course_lesson_link['type'], course_lesson_link['string']), self.driver.find_elements(course_lesson_name['type'], course_lesson_name['string']), self.driver.find_elements(list_complete_status['type'], list_complete_status['string'])):
+        for x, y, z in zip(self.driver.find_elements(course_lesson_link['type'], course_lesson_link['string']), self.driver.find_elements(course_lesson_name['type'], course_lesson_name['string']), complete_status):
             if z.get_attribute('class') == list_em_complete_class:
                 continue
             tmp = {'name': y.text.replace('\n', '').strip(), 'link': x.get_attribute('href')}

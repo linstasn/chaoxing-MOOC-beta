@@ -15,5 +15,5 @@ setup(
     version='0.1',
     description='尔雅刷课',
     options={'build_exe': build_exe_options},
-    executables=[Executable('rest_console.py')]
+    executables=[Executable('rest_console.py')], requires=['wxpy', 'logzero']
 )

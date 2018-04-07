@@ -1,18 +1,61 @@
 # coding:utf-8
 import configparser
 from pathlib import Path
-from console_erya.questions import query_mongodb, query_http_server
+# from pymongo import MongoClient, errors
+# from console_erya.questions import query_http_server
 
 conf = configparser.ConfigParser()
 conf.read(str(Path(__file__).parent.parent / 'config.ini'), encoding='utf-8')
 ip = conf.get('Server', 'ip')
 port = conf.getint('Server', 'port')
 
+# chrome 驱动
+chrome_drive_path = str(Path(__file__).parent / 'chromedriver.exe') if not conf.get('chromedriver', 'path', fallback=False) else conf.get('chromedriver', 'path', fallback=False)
+
+# http请求地址(查询)
+questions_request_query = conf.get('queryHTTP', 'url_query', fallback=False)
+
+# http请求地址(更新)
+questions_request_update = conf.get('queryHTTP', 'url_update', fallback=False)
+
+# # 数据库地址
+# db_ip = conf.get('queryDatabase', 'ip', fallback=False)
+#
+# # 数据库端口
+# db_port = conf.getint('queryDatabase', 'port', fallback=False)
+#
+# # 数据库名称
+# db_name = conf.get('queryDatabase', 'name', fallback=False)
+#
+# # 数据集合名称
+# db_database_collection = conf.get('queryDatabase', 'collection', fallback=False)
+#
+# # 数据库账号
+# db_username = conf.get('queryDatabase', 'username', fallback=False)
+#
+# # 数据库密码
+# db_pwd = conf.get('queryDatabase', 'pwd', fallback=False)
+#
+# if db_ip and db_port:
+#     client = MongoClient(db_ip, db_port)
+#     db = client.get_database(db_name)
+#     if db_username and db_pwd:
+#         try:
+#             db.authenticate(db_username, db_pwd)
+#             table = db.get_collection(db_database_collection)
+#         except errors.OperationFailure:
+#             table = None
+
+# 微信题库公众号
+wechat_mp = [x for x in conf.get('wechat', 'wechat').split()]
+
+
 # 开启debug模式(自动截图)
 debug = conf.getboolean('program', 'debug', fallback=False)
 
 # 题库查询方式 query_mongo_database
-questions_query_method = query_mongodb if conf.getint('queryMethod', 'm', fallback=False) == 1 else query_http_server
+# questions_query_method = query_mongodb if conf.getint('queryMethod', 'm', fallback=False) == 1 else query_http_server
+# questions_query_method = query_http_server
 
 # 截图
 screen_png = str(Path(__file__).parent / 'test.png')
@@ -26,11 +69,14 @@ screen_png_tmp = str(Path(__file__).parent / 'tmp.png')
 # 图片模板
 templates_pic_path = str(Path(__file__).parent / 'templates_pic')
 
-# 视频中间测试提交2
-video_test_submit1 = str(Path(__file__).parent / 'templates_pic' / 'submit1.png')
+# 视频中间测试提交1_1
+video_test_submit1_1 = str(Path(__file__).parent / 'templates_pic' / 'submit1_1.png')
 
-# 视频中间测试提交
-video_test_submit2 = str(Path(__file__).parent / 'templates_pic' / 'submit2.png')
+# 视频中间测试提交2_1
+video_test_submit2_1 = str(Path(__file__).parent / 'templates_pic' / 'submit2_1.png')
+
+# 视频中间测试提交2_2
+video_test_submit2_2 = str(Path(__file__).parent / 'templates_pic' / 'submit2_2.png')
 
 # 视频中间测试提交继续1
 video_test_continue1 = str(Path(__file__).parent / 'templates_pic' / 'continue1.png')
@@ -38,8 +84,11 @@ video_test_continue1 = str(Path(__file__).parent / 'templates_pic' / 'continue1.
 # 视频中间测试提交继续2
 video_test_continue2 = str(Path(__file__).parent / 'templates_pic' / 'continue2.png')
 
-# 视频暂停/开始
-video_pause_continue = str(Path(__file__).parent / 'templates_pic' / 'pause.png')
+# 视频暂停时开始按钮1
+video_pause_continue1 = str(Path(__file__).parent / 'templates_pic' / 'pause1.png')
+
+# 视频暂停时开始按钮2
+video_pause_continue2 = str(Path(__file__).parent / 'templates_pic' / 'pause2.png')
 
 # 视频进度条位置
 video_progress_bar = (535, 795, 690, 820)
@@ -174,7 +223,7 @@ course_lesson_name = {
 # 获取课程课时链接
 course_lesson_link = {
     'type': 'xpath',
-    'string': '/html/body/div[7]/div[1]/div[2]/div[3]/div/div/h3/span/a'
+    'string': '//div[@class="leveltwo"]/h3/span[@class="articlename"]/a'
 }
 
 # 学习页面进入视频部分iframe
@@ -262,8 +311,6 @@ test_complete_stataus = {
 }
 
 
-
-
 # 章节测试问题更新数据库
 learn_page_test_title_updatedb = {
     'type': 'xpath',
@@ -312,10 +359,10 @@ get_my_answer = {
     'string': '//div[@class="Py_answer clearfix"]/span[1]'
 }
 
-# 章节测验提交
+# 章节测验提交 //*[@id="ZyBottom"]/div/div[4]/div[4]/div[5]/a[2]  //*[@id="ZyBottom"]/div[1]/div[4]/div[5]/a[2]
 submit_test = {
     'type': 'xpath',
-    'string': '//*[@id="ZyBottom"]/div/div[4]/div[4]/div[5]/a[2]/span'
+    'string': '//div[@class="ZY_sub clearfix"]/a[2]'
 }
 
 # 章节测验确认提交
@@ -351,6 +398,22 @@ timeout = 10
 
 # 播放器iframe
 player_iframe = [
+    {
+        'name': 'iframe',
+        'index': 0
+    },
+    {
+        'name': 'iframe',
+        'index': 0
+    }
+]
+
+# 章节测试提交frame
+test_submit_iframe = [
+    {
+        'name': 'iframe',
+        'index': 0
+    },
     {
         'name': 'iframe',
         'index': 0
