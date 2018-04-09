@@ -18,4 +18,4 @@ build
 /*.png
 /setup.py
 /rpc_console.py
-/console_erya/temp/*
+/console_erya/temp/*.png
