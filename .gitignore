@@ -19,3 +19,4 @@ build
 /setup.py
 /rpc_console.py
 /console_erya/temp/*.png
+/templates_pic
