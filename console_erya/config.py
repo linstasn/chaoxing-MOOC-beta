@@ -1,16 +1,19 @@
 # coding:utf-8
 import configparser
 from pathlib import Path
+from os import getcwd
 # from pymongo import MongoClient, errors
 # from console_erya.questions import query_http_server
 
 conf = configparser.ConfigParser()
-conf.read(str(Path(__file__).parent.parent / 'config.ini'), encoding='utf-8')
+# print(__file__)
+# print(getcwd())
+conf.read(str(Path(getcwd()) / 'config.ini'), encoding='utf-8')
 ip = conf.get('Server', 'ip')
 port = conf.getint('Server', 'port')
 
 # chrome 驱动
-chrome_drive_path = str(Path(__file__).parent / 'chromedriver.exe') if not conf.get('chromedriver', 'path', fallback=False) else conf.get('chromedriver', 'path', fallback=False)
+chrome_drive_path = str(Path(getcwd()) / 'chromedriver.exe') if not conf.get('chromedriver', 'path', fallback=False) else conf.get('chromedriver', 'path', fallback=False)
 
 # http请求地址(查询)
 questions_request_query = conf.get('queryHTTP', 'url_query', fallback=False)
@@ -58,37 +61,37 @@ debug = conf.getboolean('program', 'debug', fallback=False)
 # questions_query_method = query_http_server
 
 # 截图
-screen_png = str(Path(__file__).parent / 'test.png')
+screen_png = str(Path(getcwd()) / 'temp' /'test.png')
 
 # temp文件夹
-folder_temp_path = str(Path(__file__).parent / 'temp')
+folder_temp_path = str(Path(getcwd()) / 'temp')
 
 # 截图tmp
-screen_png_tmp = str(Path(__file__).parent / 'tmp.png')
+screen_png_tmp = str(Path(getcwd()) / 'temp'/ 'tmp.png')
 
 # 图片模板
-templates_pic_path = str(Path(__file__).parent / 'templates_pic')
+templates_pic_path = str(Path(getcwd()) / 'templates_pic')
 
 # 视频中间测试提交1_1
-video_test_submit1_1 = str(Path(__file__).parent / 'templates_pic' / 'submit1_1.png')
+video_test_submit1_1 = str(Path(getcwd()) / 'templates_pic' / 'submit1_1.png')
 
 # 视频中间测试提交2_1
-video_test_submit2_1 = str(Path(__file__).parent / 'templates_pic' / 'submit2_1.png')
+video_test_submit2_1 = str(Path(getcwd()) / 'templates_pic' / 'submit2_1.png')
 
 # 视频中间测试提交2_2
-video_test_submit2_2 = str(Path(__file__).parent / 'templates_pic' / 'submit2_2.png')
+video_test_submit2_2 = str(Path(getcwd()) / 'templates_pic' / 'submit2_2.png')
 
 # 视频中间测试提交继续1
-video_test_continue1 = str(Path(__file__).parent / 'templates_pic' / 'continue1.png')
+video_test_continue1 = str(Path(getcwd()) / 'templates_pic' / 'continue1.png')
 
 # 视频中间测试提交继续2
-video_test_continue2 = str(Path(__file__).parent / 'templates_pic' / 'continue2.png')
+video_test_continue2 = str(Path(getcwd()) / 'templates_pic' / 'continue2.png')
 
 # 视频暂停时开始按钮1
-video_pause_continue1 = str(Path(__file__).parent / 'templates_pic' / 'pause1.png')
+video_pause_continue1 = str(Path(getcwd()) / 'templates_pic' / 'pause1.png')
 
 # 视频暂停时开始按钮2
-video_pause_continue2 = str(Path(__file__).parent / 'templates_pic' / 'pause2.png')
+video_pause_continue2 = str(Path(getcwd()) / 'templates_pic' / 'pause2.png')
 
 # 视频进度条位置
 video_progress_bar = (535, 795, 690, 820)

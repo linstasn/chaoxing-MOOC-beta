@@ -10,7 +10,6 @@ from base64 import b64encode
 
 class Console:
     status = {
-        'init': 0,
         'search_school': 0,
         'select_school': 0,
         'login': 0,
@@ -37,8 +36,7 @@ class Console:
         self.driver.implicitly_wait(timeout)
         self.driver.set_window_size(1920, 1080)
         self.driver.get(entrance_url)
-        self.status['init'] = 1
-        self.get_login_ver_code()
+        # self.get_login_ver_code()
 
     def quit(self):
         self.driver.quit()
@@ -59,16 +57,18 @@ class Console:
         self.status['login'] = 1
         return str(name), True
 
-    def search_school(self, school, id_: int=-1):
+    def search_school(self, school):
         """
         院校选择
         :param school:
-        :param id_: 搜索结果
         :return:
         """
-        self.operate(select_school_button['type'], select_school_button['string'], 'click')  # 选择院校
-        self.operate(select_school_search['type'], select_school_search['string'], 'send_key', school)  # 院校搜索关键词输入
-        self.operate(select_school_search_button['type'], select_school_search_button['string'], 'click')  # 院校搜索
+        # 是否已经点击过院校选择按钮进入院校选择界面
+        if not self.status['search_school']:
+            self.driver.find_element(select_school_button['type'], select_school_button['string']).click()  # 点击选择院校按钮
+        self.driver.find_element(select_school_search['type'], select_school_search['string']).clear()  # 清除搜索框
+        self.driver.find_element(select_school_search['type'], select_school_search['string']).send_keys(school)  # 向搜索框填入院校
+        self.driver.find_element(select_school_search_button['type'], select_school_search_button['string']).click()  # 院校搜索
         self.__select_school_result = self.driver.find_elements(select_school_result['type'], select_school_result['string'])
         self.status['search_school'] = 1
         return [x.text for x in self.__select_school_result]
@@ -81,31 +81,31 @@ class Console:
         self.status['select_school'] = 1
         return True
 
-    def get_login_ver_code(self, refresh=False):
-        """
-        获取验证码图片，保存为code.png
-        :param refresh: 是否刷新
-        :return:
-        """
-        filename = 'vercode.png'
-        if refresh:
-            self.operate(refresh_code['type'], refresh_code['string'], 'click')
-        self.driver.get_screenshot_as_file('code.png')  # 保存登陆界面截图
-        a = self.driver.find_element_by_id('numVerCode')  # 定位验证码
-        l = a.location['x'] + 1
-        t = a.location['y'] + 1
-        r = a.location['x'] + a.size['width']
-        b = a.location['y'] + a.size['height']
-        im = Image.open('code.png')
-        im = im.crop((l, t, r, b))
-        im.save(os.path.join(path_vercode, filename))
-        result = self.__base64_png+b64encode(open(os.path.join(path_vercode, filename), 'rb').read()).decode()
-        try:
-            os.remove('code.png')
-            os.remove(os.path.join(path_vercode, filename))
-        except OSError:
-            pass
-        return result
+    # def get_login_ver_code(self, refresh=False):
+    #     """
+    #     获取验证码图片，保存为code.png
+    #     :param refresh: 是否刷新
+    #     :return:
+    #     """
+    #     filename = 'vercode.png'
+    #     if refresh:
+    #         self.operate(refresh_code['type'], refresh_code['string'], 'click')
+    #     self.driver.get_screenshot_as_file('code.png')  # 保存登陆界面截图
+    #     a = self.driver.find_element_by_id('numVerCode')  # 定位验证码
+    #     l = a.location['x'] + 1
+    #     t = a.location['y'] + 1
+    #     r = a.location['x'] + a.size['width']
+    #     b = a.location['y'] + a.size['height']
+    #     im = Image.open('code.png')
+    #     im = im.crop((l, t, r, b))
+    #     im.save(os.path.join(path_vercode, filename))
+    #     result = self.__base64_png+b64encode(open(os.path.join(path_vercode, filename), 'rb').read()).decode()
+    #     try:
+    #         os.remove('code.png')
+    #         os.remove(os.path.join(path_vercode, filename))
+    #     except OSError:
+    #         pass
+    #     return result
 
     def get_course(self):
         self.__course = []
@@ -139,16 +139,18 @@ class Console:
             self.driver.switch_to.window(x)
             if self.driver.title == course_page_title:
                 break
+        self.driver.find_elements('xpath', '/html/body/div[7]/div[1]/div[2]/div[3]/div[1]/div[1]/h3/span[2]/a')[0].click()
+        time.sleep(5)
         # 是否已完成
-        complete_status = self.driver.find_elements(list_complete_status['type'], list_complete_status['string'])
-        # 课时链接、课时名称、完成状态
-        for x, y, z in zip(self.driver.find_elements(course_lesson_link['type'], course_lesson_link['string']), self.driver.find_elements(course_lesson_name['type'], course_lesson_name['string']), complete_status):
-            if z.get_attribute('class') == list_em_complete_class:
-                continue
-            tmp = {'name': y.text.replace('\n', '').strip(), 'link': x.get_attribute('href')}
-            self.__course_lesson.append(tmp)
-        self.driver.close()
-        AutomaticCompletion(course_lesson=self.__course_lesson, driver=self.driver).start()
+        # complete_status = self.driver.find_elements(list_complete_status['type'], list_complete_status['string'])
+        # # 课时链接、课时名称、完成状态
+        # for x, y, z in zip(self.driver.find_elements(course_lesson_link['type'], course_lesson_link['string']), self.driver.find_elements(course_lesson_name['type'], course_lesson_name['string']), complete_status):
+        #     if z.get_attribute('class') == list_em_complete_class:
+        #         continue
+        #     tmp = {'name': y.text.replace('\n', '').strip(), 'link': x.get_attribute('href')}
+        #     self.__course_lesson.append(tmp)
+        # self.driver.close()
+        AutomaticCompletion(driver=self.driver).start()
         self.status['browser_watch'] = 1
         return True
 

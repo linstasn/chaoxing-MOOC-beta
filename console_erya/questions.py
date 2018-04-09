@@ -1,10 +1,8 @@
 # coding:utf-8
-# from pymongo import MongoClient, errors
 import re
 import demjson
 import requests
 from hashlib import md5
-from .log import *
 from .config import questions_request_update, questions_request_query, wechat_mp
 
 
@@ -63,6 +61,8 @@ def query_http_server(op, **kwargs):
                 i = demjson.decode(requests.get(questions_request_query, params={'title': kwargs['title'], 'enc': md.hexdigest()}).text, encoding='utf-8')
                 if i['code'] == 100:
                     if kwargs['test_type'] == '判断题':
+                        if isinstance(i['data'], list):
+                            i['data'] = i['data'][0]
                         if i['data'].lower() in ['√', '正确', 'true']:
                             return True
                         else:
@@ -73,6 +73,8 @@ def query_http_server(op, **kwargs):
                     tmp = wechat_search(kwargs['title'])
                     if tmp:
                         if kwargs['test_type'] == '判断题':
+                            if isinstance(tmp, list):
+                                tmp = tmp[0]
                             if tmp in ['√', '正确', 'true']:
                                 return True
                         else:

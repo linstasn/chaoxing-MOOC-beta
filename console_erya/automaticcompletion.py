@@ -1,9 +1,7 @@
 # coding:utf-8
-import logging
 import time
 import os
 import imagehash
-import string
 import re
 import threading
 from .log import *
@@ -21,34 +19,50 @@ class AutomaticCompletion(threading.Thread):
     __course = []
     __js = 'window.open("{0}");'
 
-    def __init__(self, course_lesson, driver):
+    def __init__(self, driver):
         threading.Thread.__init__(self)
-        self.course_lesson = course_lesson
+        # self.course_lesson = course_lesson
         self.driver = driver
+        self.xpath = ['//div[@class="ncells"]/a//span[@class="roundpointStudent  orange01 a002"]', '//div[@class="ncells"]/a//span[@class="roundpoint  orange01"]']
 
     def run(self):
-        for x in self.course_lesson:
-            logger.info(log_template, 'Watch', x['name'], 'Start')
-            self.__watch(x['link'])
-            logger.info(log_template, 'Watch',  x['name'], 'Complete')
-            logger.info(log_template, 'Answer', x['name'], 'Start')
-            self.__answer(x['link'])
-            logger.info(log_template, 'Answer', x['name'], 'Complete')
-            logger.info(log_template, 'Update database', x['name'], 'Start')
-            self.__update_db()
-            logger.info(log_template, 'Update database', x['name'], 'Complete')
-            self.driver.close()
+        for x in self.xpath:
+            while True:
+                try:
+                    self.driver.switch_to.default_content()
+                    # self.driver.find_element('xpath', x).click()
+                    ActionChains(self.driver).click(self.driver.find_element('xpath', x)).perform()
+                    self.__watch()
+                    self.__answer()
+                    self.__update_db()
+                    time.sleep(10)
+                except common.exceptions.NoSuchElementException:
+                    break
+        # for x in self.course_lesson:
+        #     logger.info(log_template, 'Watch', x['name'], 'Start')
+        #     self.__watch(x['link'])
+        #     logger.info(log_template, 'Watch',  x['name'], 'Complete')
+        #     logger.info(log_template, 'Answer', x['name'], 'Start')
+        #     self.__answer(x['link'])
+        #     logger.info(log_template, 'Answer', x['name'], 'Complete')
+        #     logger.info(log_template, 'Update database', x['name'], 'Start')
+        #     self.__update_db()
+        #     logger.info(log_template, 'Update database', x['name'], 'Complete')
+        #     self.driver.close()
 
-    def __watch(self, lesson):
-        self.driver.switch_to.window(self.driver.window_handles[0])
-        self.driver.execute_script(self.__js.format(lesson))
-        for x in self.driver.window_handles:
-            self.driver.switch_to.window(x)
-            if x == learn_page_title:
-                break
+    def __watch(self):
+        # self.driver.switch_to.window(self.driver.window_handles[0])
+        # self.driver.execute_script(self.__js.format(lesson))
+        # for x in self.driver.window_handles:
+        #     self.driver.switch_to.window(x)
+        #     if x == learn_page_title:
+        #         break
         self.driver.switch_to.default_content()
         # 视频学习部分
-        self.driver.find_element(learn_page_video_button['type'], learn_page_video_button['string']).click()
+        try:
+            self.driver.find_element(learn_page_video_button['type'], learn_page_video_button['string']).click()
+        except common.exceptions.NoSuchElementException:
+            return True
         status = 0
         self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, str(status % 2) + '.png'))
         while True:
@@ -144,19 +158,23 @@ class AutomaticCompletion(threading.Thread):
                 else:
                     logger.info(log_template, '视频播放', '刷新页面', '刷新')
                     self.driver.refresh()
-        self.driver.close()
+        # self.driver.close()
         return True
 
-    def __answer(self, lesson):
-        self.driver.switch_to.window(self.driver.window_handles[0])
-        self.driver.execute_script(self.__js.format(lesson))
-        for x in self.driver.window_handles:
-            self.driver.switch_to.window(x)
-            if x == learn_page_title:
-                break
+    def __answer(self):
+        # self.driver.switch_to.window(self.driver.window_handles[0])
+        # self.driver.execute_script(self.__js.format(lesson))
+        # for x in self.driver.window_handles:
+        #     self.driver.switch_to.window(x)
+        #     if x == learn_page_title:
+        #         break
+        sleep_time = 10
         self.driver.switch_to.default_content()
         # 章节测试答题部分
-        self.driver.find_element(learn_page_test_button['type'], learn_page_test_button['string']).click()
+        try:
+            self.driver.find_element(learn_page_test_button['type'], learn_page_test_button['string']).click()
+        except common.exceptions.NoSuchElementException:
+            return True
         start_time = time.time()
         while True:
             if time.time() - start_time > 20:
@@ -191,64 +209,41 @@ class AutomaticCompletion(threading.Thread):
         for x in learn_page_test_iframe:
             # driver.switch_to.frame(driver.find_elements_by_tag_name(x['name'])[x['index']])
             self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
-        titles = self.driver.find_elements(learn_page_test_title['type'], learn_page_test_title['string'])
-        selects = self.driver.find_elements(learn_page_test_select_separate['type'], learn_page_test_select_separate['string'])
-        selects_text = [x.text.strip().lstrip(string.ascii_uppercase).strip() for x in self.driver.find_elements(learn_page_test_select_separate['type'], learn_page_test_select_separate['string'])]
-        # 选项尾指针
-        select_num_foot = 0
-        judge_num = 0
-        tag = 0
-        for index, x in enumerate(titles):
-            # 选择题首选项
-            select_num_head = select_num_foot
-            test_type = x.text.strip()[1:4]
-            title = x.text.strip()[5:]
-            if test_type in ['单选题', '多选题']:
-                # 是否选择正确答案
-                answer_tag = 0
-                select = self.driver.find_elements(learn_page_test_select_gather['type'], learn_page_test_select_gather['string'])[index - tag].text
-                logger.info(log_template, '请求服务器/微信公众号', '查询: ' + title, '...')
-                right_answer = query_http_server(op='query', test_type=test_type, title=title)
-                for y in selects_text[select_num_foot:]:
-                    if y in select:
-                        if right_answer:
-                            if y in right_answer:
-                                selects[select_num_foot].click()
-                                answer_tag = 1
-                                logger.info(log_template, '查询成功', 'Title:  '+title, 'Right answer:  '+'\t'.join(right_answer))
-                        select_num_foot += 1
-                    else:
-                        break
-                if not answer_tag:
-                    logger.error(log_template, '查询', 'Title:  ' + title, '失败')
-                    randint_select = randint(select_num_head, select_num_foot-1)
-                    selects[randint_select].click()
-                    logger.info(log_template, '随机选择', 'Title: ' + title, str(selects[randint_select].text.replace('\n', ' ').strip()))
-                # # 选项字符串
-                # try:
-                #     select = self.driver.find_elements(learn_page_test_select_gather['type'], learn_page_test_select_gather['string'])[index - tag]
-                # except IndexError:
-                #     continue
-                # # 分割选项
-                # sel = [t.strip('、').strip() for t in re.split('[{0}]'.format(self.__select), select.text) if t.strip('、').strip()]
-                # right_answer = self.__require_server(op='query', test_type=test_type, title=title)
-                # for i, v in enumerate(sel):
-                #     if v in right_answer:
-                #         self.driver.find_elements(learn_page_test_select_separate['type'], learn_page_test_select_separate['string'])[select_num_foot].click()
-                #     logger.info('asdfasdf'+v+'==='+str(select_num_foot))
-                #     select_num_foot += 1
-            elif test_type == '判断题':
-                tag += 1
-                right_answer = query_http_server(op='query', test_type=test_type, title=title)
+        tmp = self.driver
+        while True:
+            try:
+                tmp = tmp.find_element_by_class_name('TiMu')
+            except common.exceptions.NoSuchElementException:
+                break
+            title = tmp.find_element_by_class_name('clearfix').text.strip('1234567890').replace('\n', '').strip()
+            test_type = title[1:4]
+            logger.info(log_template, '正在请求服务器/微信公众号', '查询: ' + title, '...')
+            right_answer = query_http_server(op='query', test_type=test_type, title=title[5:])
+            if test_type == '判断题':
                 if right_answer:
-                    logger.info(log_template, '判断', 'Title:  ' + title, 'Right answer:  ' + right_answer.__str__())
-                    self.driver.find_elements(test_page_true_or_false_select['type'], test_page_true_or_false_select['string'])[judge_num].click()
+                    logger.info(log_template, '判断', 'Title:  ' + title, 'answer:  ' + '正确')
+                    tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('label')[0].click()
                 else:
-                    self.driver.find_elements(test_page_true_or_false_select['type'], test_page_true_or_false_select['string'])[judge_num+1].click()
-                    logger.info(log_template, '判断', 'Title:  ' + title, 'Right answer:  ' + right_answer.__str__())
-                judge_num += 2
+                    logger.info(log_template, '判断', 'Title:  ' + title, 'answer:  ' + '错误')
+                    tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('label')[1].click()
+            elif test_type in ['单选题', '多选题']:
+                tag = 0
+                if right_answer:
+                    logger.info(log_template, '查询到', 'Title:  ' + title, '答案:  ' + '\t'.join(right_answer))
+                    for x in tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('li'):
+                        if x.text.split('\n')[1].strip() in right_answer:
+                            tag = 1
+                            x.click()
+                if not tag:
+                    logger.info(log_template, '查询答案失败', 'Title:  ' + title, '随机选择一项')
+                    sleep_time = 60*5
+                    # 未搜索到该题目答案，随机选择一项
+                    tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('li')[randint(0, len(tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('li'))-1)].click()
             else:
-                logger.error(log_template, '查询', test_type+ '\t暂不支持', '跳过')
+                logger.error(log_template, '查询', test_type + '\t暂不支持', '跳过')
+        # 提交部分
+        logger.info(log_template, '提交章节测试', '如果有未查到的单/多选题会等待5分钟提交，默认10s后提交', '等待')
+        time.sleep(sleep_time)
         self.driver.switch_to.default_content()
         for x in test_submit_iframe:
             self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
@@ -259,6 +254,7 @@ class AutomaticCompletion(threading.Thread):
             else:
                 break
         self.driver.find_element(submit_test_confirm['type'], submit_test_confirm['string']).click()
+        logger.info(log_template, '提交章节测试', '确认', '提交')
 
     def __update_db(self):
         start_time = time.time()
@@ -278,49 +274,40 @@ class AutomaticCompletion(threading.Thread):
                 # 页面是否加载完成
                 self.driver.find_element(test_load_complete_tag['type'], test_load_complete_tag['string'])
             except common.exceptions.NoSuchElementException:
-                logger.error(log_template, '错误', '未知错误', '继续')
+                logger.error(log_template, '错误', '更新题库页面加载未知错误', '继续')
                 continue
             break
         self.driver.switch_to.default_content()
         for x in learn_page_test_iframe_updatedb:
             # driver.switch_to.frame(driver.find_elements_by_tag_name(x['name'])[x['index']])
             self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
-        # 题目题干
-        titles = self.driver.find_elements(learn_page_test_title_updatedb['type'], learn_page_test_title_updatedb['string'])
-        # 各题得分
-        scores = self.driver.find_elements(learn_page_test_score_updatedb['type'], learn_page_test_score_updatedb['string'])
-        # 我的回答
-        my_answer = self.driver.find_elements(get_my_answer['type'], get_my_answer['string'])
-        # 选项内容
-        select = self.driver.find_elements(test_select_split_updatedb['type'], test_select_split_updatedb['string'])
-        tag = 0
-        for index, value in enumerate(scores):
+        for x in self.driver.find_elements_by_class_name('TiMu'):
             try:
-                if float(value.text.strip('分')) != 0:
-                    test_type = titles[index].text.strip()[1:4]
-                    title = titles[index].text.replace('\n', ' ').strip()[5:]
-                    if test_type in ['单选题', '多选题']:
-                        my_ans = re.findall('[{0}]'.format(self.__select), my_answer[index].text)
-                        sel = [x.strip('、').strip() for x in re.split('[{0}]'.format(self.__select), select[index-tag].text) if x]
-                        right_answer = []
-                        for x in my_ans:
-                            right_answer.append(sel[self.__select.index(x)])
-                        answer = '&'.join(right_answer)
-                        if query_http_server(op='update', title=title, test_type=test_type, answer=answer.strip()):
-                            logger.info(log_template, '更新题库', title + '\t答案: ' + answer, '\t成功')
-                        else:
-                            logger.error(log_template, '更新题库', title + '\t答案: ' + answer, '\t失败')
-                    elif test_type == '判断题':
-                        tag += 1
-                        answer = my_answer[index].text.strip('我的答案：').strip()
-                        if query_http_server(op='update', title=title, test_type=test_type, answer=answer):
-                            logger.info(log_template, '更新题库', title + '\t答案: ' + answer, '\t成功')
-                        else:
-                            logger.error(log_template, '更新题库', title + '\t答案: ' + answer, '\t失败')
+                # 选择题正确icon
+                right_or_wrong = x.find_element_by_tag_name('form').find_element_by_tag_name('div').find_element_by_tag_name('i').get_attribute('class')
+            except (common.exceptions.NoSuchElementException, IndexError):
+                # 判断题正确icon
+                right_or_wrong = x.find_elements_by_tag_name('div')[4].find_elements_by_tag_name('i')[1].get_attribute('class')
+            if right_or_wrong == 'fr dui':
+                title = x.find_elements_by_tag_name('div')[1].text.strip().replace('\n', '')
+                my_answer = x.find_elements_by_tag_name('div')[4].text.split('\n')[0].strip('我的答案：').strip()
+                test_type = title[1:4]
+                if test_type == '判断题':
+                    if query_http_server(op='update', title=title[5:], test_type=test_type, answer=my_answer.strip()):
+                        logger.info(log_template, '更新题库', title + '\t答案: ' + my_answer, '\t成功')
                     else:
-                        logger.error(log_template, '更新题库', test_type + '\t暂不支持', '跳过')
-                        continue
+                        logger.info(log_template, '更新题库', title + '\t答案: ' + my_answer, '\t失败')
+                elif test_type in ['单选题', '多选题']:
+                    ma = re.findall('[{0}]'.format(self.__select), my_answer)
+                    r = []
+                    for y in ma:
+                        r.append(x.find_elements_by_tag_name('li')[self.__select.index(y)].text.strip(self.__select).strip('、').strip())
+                    answer = '&'.join(r)
+                    if query_http_server(op='update', title=title[5:], test_type=test_type, answer=answer.strip()):
+                        logger.info(log_template, '更新题库', title + '\t答案: ' + answer, '\t成功')
+                    else:
+                        logger.info(log_template, '更新题库', title + '\t答案: ' + answer, '\t失败')
                 else:
-                    query_http_server(op='addtitle', title=titles['index'].text.strip())
-            except (ValueError, TypeError):
-                logger.error(log_template, '错误', '未知错误', '继续')
+                    logger.error(log_template, '更新题库', '暂不支持：' + test_type, '跳过')
+            elif right_or_wrong == 'fr bandui':
+                pass

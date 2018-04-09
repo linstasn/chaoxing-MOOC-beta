@@ -14,9 +14,9 @@ r2 = '(?<!/)&'
 messages = []
 
 
-def qrcode_wechat(uuid, status, qrcode):
-    with open('wxlogin.png', 'wb') as f:
-        f.write(qrcode)
+# def qrcode_wechat(uuid, status, qrcode):
+#     with open('wxlogin.png', 'wb') as f:
+#         f.write(qrcode)
 
 
 bot = Bot(cache_path=True, console_qr=1)

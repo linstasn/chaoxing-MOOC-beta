@@ -12,7 +12,7 @@ build_exe_options = {
 
 setup(
     name='erya',
-    version='0.1',
+    version='0.3',
     description='尔雅刷课',
     options={'build_exe': build_exe_options},
     executables=[Executable('rest_console.py')], requires=['wxpy', 'logzero']

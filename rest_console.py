@@ -1,6 +1,6 @@
 # coding:utf-8
 from flask import Flask
-from console_erya.config import ip, port
+from console_erya.config import ip, port, debug
 from flask_restful import reqparse, Api, Resource
 from console_erya.global_var import globalvar
 from console_erya import console
@@ -25,7 +25,7 @@ class Main(Resource):
         parser.add_argument('search_school', type=str, location='args')
         parser.add_argument('instance_name', type=str, location='args')
         parser.add_argument('get_course', type=str, location='args')
-        parser.add_argument('get_ver_code', type=bool, location='args')
+        # parser.add_argument('get_ver_code', type=bool, location='args')
         parser.add_argument('author', type=str, location='args')
         args = parser.parse_args()
         if args['author']:
@@ -34,23 +34,20 @@ class Main(Resource):
             con = globalvar.get(args['instance_name'])
             if con:
                 if args['search_school']:
-                    if not con.status['search_school']:
                         tmp = con.search_school(args['search_school'])
                         return [{'status': 100, 'message': '', 'data': tmp}]
-                    else:
-                        return [{'status': 404, 'message': '已搜索学校'}]
-                elif args['get_ver_code'] == False:
-                    if con.status['select_school'] and not con.status['login']:
-                        tmp = con.get_login_ver_code()
-                        return [{'status': 100, 'message': '先登陆', 'data': tmp}]
-                    else:
-                        return [{'status': 404, 'message': '步骤错误'}]
-                elif args['get_ver_code']:
-                    if con.status['select_school'] and not con.status['login']:
-                        tmp = con.get_login_ver_code(refresh=True)
-                        return [{'status': 100, 'message': '先登陆', 'data': tmp}]
-                    else:
-                        return [{'status': 404, 'message': '步骤错误'}]
+                # elif args['get_ver_code'] == False:
+                #     if con.status['select_school'] and not con.status['login']:
+                #         tmp = con.get_login_ver_code()
+                #         return [{'status': 100, 'message': '先登陆', 'data': tmp}]
+                #     else:
+                #         return [{'status': 404, 'message': '步骤错误'}]
+                # elif args['get_ver_code']:
+                #     if con.status['select_school'] and not con.status['login']:
+                #         tmp = con.get_login_ver_code(refresh=True)
+                #         return [{'status': 100, 'message': '先登陆', 'data': tmp}]
+                #     else:
+                #         return [{'status': 404, 'message': '步骤错误'}]
                 elif args['get_course']:
                     if con.status['login']:
                         tmp = con.get_course()
@@ -75,7 +72,6 @@ class Main(Resource):
         parser.add_argument('init', type=str, help='添加实例名称', location='form')
         args = parser.parse_args()
         if args['init']:
-            print(1)
             if globalvar.get(args['init']):
                 con = globalvar.get(args['instance_name'])
                 con.quit()
@@ -150,7 +146,7 @@ if __name__ == '__main__':
     print('=                                                          =')
     print('|                                                          |')
     print('============================================================')
-    app.run(host=ip, port=port, debug=False)
+    app.run(host=ip, port=port, debug=debug)
     # app.run(debug=True)
 # from xmlrpc.server import SimpleXMLRPCServer
 # from xmlrpc.server import SimpleXMLRPCRequestHandler
