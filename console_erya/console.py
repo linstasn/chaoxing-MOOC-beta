@@ -116,12 +116,13 @@ class Console:
         for x in self.driver.find_elements(course_name_list['type'], course_name_list['string']):
             if not x.text:
                 continue
-            try:
-                if x.text.split(remove_irrelevant_course[0])[remove_irrelevant_course[1]].strip() == remove_irrelevant_course[2]:
-                    continue
-                self.__course.append(x)
-            except IndexError:
-                continue
+            self.__course.append(x)
+            # try:
+            #     if x.text.split(remove_irrelevant_course[0])[remove_irrelevant_course[1]].strip() == remove_irrelevant_course[2]:
+            #         continue
+            #     self.__course.append(x)
+            # except IndexError:
+            #     continue
         self.status['get_course'] = 1
         return [x.text for x in self.__course]
 

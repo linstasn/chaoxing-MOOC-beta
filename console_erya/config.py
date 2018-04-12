@@ -223,7 +223,7 @@ course_name_list_frame = [
 # 课程列表
 course_name_list = {
     'type': 'xpath',
-    'string': '//div[@class="Mconright httpsClass"]'
+    'string': '//div[@class="Mconright httpsClass"]/h3/a'
     #'string': '/html/body/div/div[2]/div[2]/ul/li'
 }
 
@@ -311,13 +311,13 @@ learn_page_test_iframe = [
 # 学习页面视频按钮
 learn_page_video_button = {
     'type': 'xpath',
-    'string': '//span[@title="视频"]'
+    'string': '//span[starts-with(@title, "视频")]'
 }
 
 # 学习页面章节测验按钮
 learn_page_test_button = {
     'type': 'xpath',
-    'string': '//span[@title="章节测验"]'
+    'string': '//span[starts-with(@title, "章节测验")]'
 }
 
 # 视频完成状态，如果xpath不报错则表示已完成

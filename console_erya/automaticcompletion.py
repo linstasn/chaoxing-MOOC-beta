@@ -33,13 +33,18 @@ class AutomaticCompletion(threading.Thread):
                     self.driver.switch_to.default_content()
                     # self.driver.find_element('xpath', x).click()
                     ActionChains(self.driver).click(self.driver.find_element('xpath', x)).perform()
+                    time.sleep(5)
                     if last_lesson == self.driver.find_element('xpath', '//div[@id="mainid"]/h1').text:
                         logger.error(log_template, '出错', '无法检测视频状态，手动观看【{0}】,输入y确认已完成观看'.format(last_lesson), '结束刷课')
                         while True:
                             if input('是否已手动观看完成？(y)').strip() == 'y':
                                 break
                     last_lesson = self.driver.find_element('xpath', '//div[@id="mainid"]/h1').text
-                    self.__watch()
+                    if self.__watch():
+                        print(1)
+                        last_lesson = None
+                    else:
+                        print(2)
                     self.__answer()
                     self.__update_db()
                     time.sleep(10)
@@ -73,8 +78,8 @@ class AutomaticCompletion(threading.Thread):
         status = 0
         self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, str(status % 2) + '.png'))
         while True:
-            if debug:
-                self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()).__str__() + '.png'))
+            # if debug:
+            #     self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()).__str__() + '.png'))
             status += 1
             try:
                 self.driver.switch_to.default_content()
@@ -91,10 +96,10 @@ class AutomaticCompletion(threading.Thread):
                 self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
             self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, str(status % 2) + '.png'))
             if imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(player_screenshot_site)) - imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str((status+1) % 2) + '.png')).crop(player_screenshot_site)) != 0:
-                time.sleep(10)
+                time.sleep(5)
             elif (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar1).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar1).tobytes()) or \
                     (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar2).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar2).tobytes()):
-                time.sleep(10)
+                time.sleep(5)
             else:
                 self.driver.get_screenshot_as_file(screen_png)
                 i1 = Image.open(screen_png)

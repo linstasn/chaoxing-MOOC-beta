@@ -16,6 +16,8 @@ CORS(app, supports_credentials=True)
 api = Api(app)
 
 __author__ = 'bankroft'
+__version__ = '0.34 debug'
+__blog__ = 'https://www.bankroft.cn'
 
 
 class Main(Resource):
@@ -139,13 +141,11 @@ api.add_resource(GetInfo, '/getinfo')
 
 
 if __name__ == '__main__':
-    print('============================================================')
-    print('|                                                          |')
-    print('=                                                          =')
-    print('=                     AUTHOR:BANKROFT                      =')
-    print('=                                                          =')
-    print('|                                                          |')
-    print('============================================================')
+    print('='*60)
+    print('|{0}Author:%9s{1}|'.format(' '*20, ' '*22) % __author__)
+    print('|{0}Version:%10s{1}|'.format(' '*20, ' '*20) % __version__)
+    print('|{0}Blog:%24.24s{1}|'.format(' '*20, ' '*9) % __blog__)
+    print('='*60)
     app.run(host=ip, port=port, debug=debug)
     # app.run(debug=True)
 # from xmlrpc.server import SimpleXMLRPCServer
