@@ -67,13 +67,19 @@ screen_png = str(Path(getcwd()) / 'temp' /'test.png')
 folder_temp_path = str(Path(getcwd()) / 'temp')
 
 # 截图tmp
-screen_png_tmp = str(Path(getcwd()) / 'temp'/ 'tmp.png')
+screen_png_tmp = str(Path(getcwd()) / 'temp' / 'tmp.png')
 
 # 图片模板
 templates_pic_path = str(Path(getcwd()) / 'templates_pic')
 
 # 视频中间测试提交1_1
 video_test_submit1_1 = str(Path(getcwd()) / 'templates_pic' / 'submit1_1.png')
+
+# 视频中间测试提交1_2
+video_test_submit1_2 = str(Path(getcwd()) / 'templates_pic' / 'submit1_2.png')
+
+# 视频中间测试提交1_3
+video_test_submit1_3 = str(Path(getcwd()) / 'templates_pic' / 'submit1_3.png')
 
 # 视频中间测试提交2_1
 video_test_submit2_1 = str(Path(getcwd()) / 'templates_pic' / 'submit2_1.png')
@@ -87,14 +93,20 @@ video_test_continue1 = str(Path(getcwd()) / 'templates_pic' / 'continue1.png')
 # 视频中间测试提交继续2
 video_test_continue2 = str(Path(getcwd()) / 'templates_pic' / 'continue2.png')
 
-# 视频暂停时开始按钮1
+# 视频暂停时开始按钮1(470, 795, 490, 820)
 video_pause_continue1 = str(Path(getcwd()) / 'templates_pic' / 'pause1.png')
 
-# 视频暂停时开始按钮2
+# 视频暂停时开始按钮2(470, 795, 490, 820)
 video_pause_continue2 = str(Path(getcwd()) / 'templates_pic' / 'pause2.png')
 
-# 视频进度条位置
-video_progress_bar = (535, 795, 690, 820)
+# 视频暂停时开始按钮3(470, 773, 490, 795)
+video_pause_continue3 = str(Path(getcwd()) / 'templates_pic' / 'pause3.png')
+
+# 视频进度条位置1
+video_progress_bar1 = (535, 795, 690, 820)
+
+# 视频进度条位置2
+video_progress_bar2 = (535, 775, 690, 800)
 
 # 视频比较尺寸
 player_screenshot_site = (470, 300, 1130, 790)
@@ -102,14 +114,20 @@ player_screenshot_site = (470, 300, 1130, 790)
 # 图片声音调节
 size_volume = (1055, 797, 1085, 815)
 
-# 视频暂停/继续按钮
-site_video_pause_continue = (470, 795, 490, 820)
+# 视频暂停/继续按钮1
+site_video_pause_continue1 = (470, 795, 490, 820)
+
+# 视频暂停/继续按钮2
+site_video_pause_continue2 = (470, 773, 490, 795)
 
 # 视频内答题 提交 按钮位置1
 site_video_test_submit1 = (940, 535, 990, 560)
 
 # 视频内答题 提交 按钮位置2
 site_video_test_submit2 = (940, 568, 990, 593)
+
+# 视频内答题 提交 按钮位置2
+site_video_test_submit3 = (950, 510, 1000, 535)
 
 # 视频内答题提交成功后继续按钮位置1
 size_video_continue1 = (940, 535, 990, 560)
@@ -205,7 +223,8 @@ course_name_list_frame = [
 # 课程列表
 course_name_list = {
     'type': 'xpath',
-    'string': '/html/body/div/div[2]/div[2]/ul/li'
+    'string': '//div[@class="Mconright httpsClass"]'
+    #'string': '/html/body/div/div[2]/div[2]/ul/li'
 }
 
 # 去除开启复习模式课程, split('\n')[-2].strip() == '已开启复习模式

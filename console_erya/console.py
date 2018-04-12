@@ -130,7 +130,7 @@ class Console:
             course_id = int(course_id)
         except (TypeError, ValueError):
             return False
-        if (course_id >= (len(self.__course) - 1)) or (course_id < 0):
+        if (course_id > (len(self.__course) - 1)) or (course_id < 0):
             return False
         course = self.__course[course_id]
         course.click()
