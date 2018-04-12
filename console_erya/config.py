@@ -454,3 +454,10 @@ list_complete_status = {
 
 # 课时列表完成状态em class属性
 list_em_complete_class = 'openlock'
+
+# 第一节课程xpath
+first_lesson = {
+    'type': 'xpath',
+    'string': '//div[@class="leveltwo"]//span[@class="articlename"]',
+    # 'string': '/html/body/div[7]/div[1]/div[2]/div[3]/div[1]/div[1]/h3/span[2]/a'
+}

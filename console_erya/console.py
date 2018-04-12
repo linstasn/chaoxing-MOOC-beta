@@ -139,7 +139,7 @@ class Console:
             self.driver.switch_to.window(x)
             if self.driver.title == course_page_title:
                 break
-        self.driver.find_elements('xpath', '/html/body/div[7]/div[1]/div[2]/div[3]/div[1]/div[1]/h3/span[2]/a')[0].click()
+        self.driver.find_elements(first_lesson['type'], first_lesson['string'])[0].click()
         time.sleep(5)
         # 是否已完成
         # complete_status = self.driver.find_elements(list_complete_status['type'], list_complete_status['string'])
