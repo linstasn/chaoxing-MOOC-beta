@@ -41,10 +41,7 @@ class AutomaticCompletion(threading.Thread):
                                 break
                     last_lesson = self.driver.find_element('xpath', '//div[@id="mainid"]/h1').text
                     if self.__watch():
-                        print(1)
                         last_lesson = None
-                    else:
-                        print(2)
                     self.__answer()
                     self.__update_db()
                     time.sleep(10)
@@ -76,7 +73,7 @@ class AutomaticCompletion(threading.Thread):
         except common.exceptions.NoSuchElementException:
             return True
         status = 0
-        self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, str(status % 2) + '.png'))
+        self.screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
         while True:
             # if debug:
             #     self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()).__str__() + '.png'))
@@ -94,8 +91,8 @@ class AutomaticCompletion(threading.Thread):
             for x in learn_page_video_iframe:
                 # driver.switch_to.frame(driver.find_elements_by_tag_name(x['name'])[x['index']])
                 self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
-            self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, str(status % 2) + '.png'))
-            if imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(player_screenshot_site)) - imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str((status+1) % 2) + '.png')).crop(player_screenshot_site)) != 0:
+            self.screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
+            if imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png'))) - imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str((status+1) % 2) + '.png'))) != 0:
                 time.sleep(5)
             elif (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar1).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar1).tobytes()) or \
                     (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar2).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar2).tobytes()):
@@ -347,3 +344,24 @@ class AutomaticCompletion(threading.Thread):
                     logger.error(log_template, '更新题库', '暂不支持：' + test_type, '跳过')
             elif right_or_wrong == 'fr bandui':
                 pass
+
+    def screenshot_video(self, filename):
+        self.driver.get_screenshot_as_file('tmp.png')
+        self.driver.switch_to.default_content()
+        for x in learn_page_video_iframe:
+            # driver.switch_to.frame(driver.find_elements_by_tag_name(x['name'])[x['index']])
+            self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
+        tmp = self.driver.find_element_by_tag_name('object')
+        i = Image.open('tmp.png')
+        i.crop(
+            (
+                tmp.location_once_scrolled_into_view['x'],
+                tmp.location_once_scrolled_into_view['y'],
+                tmp.location_once_scrolled_into_view['x'] + tmp.size['width'],
+                tmp.location_once_scrolled_into_view['y'] + tmp.size['height']
+            )
+        ).save(filename)
+        try:
+            os.remove('tmp.png')
+        except FileNotFoundError:
+            pass
