@@ -168,19 +168,19 @@ class AutomaticCompletion(threading.Thread):
                 elif (imagehash.average_hash(i2_3) - imagehash.average_hash(Image.open(video_test_submit3_1))) <= 5:
                     logger.info(log_template, '视频内答题', '三行title', 'Start')
                     # A
-                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 167).click().perform()
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 191).click().perform()
                     time.sleep(1)
                     # 提交
-                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 319).click().perform()
                     time.sleep(1)
                     # B
-                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 217).click().perform()
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 241).click().perform()
                     time.sleep(1)
                     # 提交
-                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 319).click().perform()
                     time.sleep(1)
                     # 提交
-                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 319).click().perform()
                     time.sleep(1)
                 elif (imagehash.average_hash(i1.crop(location_video_pause_continue1)) - imagehash.average_hash(Image.open(video_pause_continue1))) <= 8:
                     logger.info(log_template, '视频播放', '点击播放按钮', '点击')
@@ -364,5 +364,5 @@ class AutomaticCompletion(threading.Thread):
         ).save(filename)
         try:
             os.remove('tmp.png')
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             pass
