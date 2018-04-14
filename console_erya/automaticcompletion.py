@@ -73,7 +73,7 @@ class AutomaticCompletion(threading.Thread):
         except common.exceptions.NoSuchElementException:
             return True
         status = 0
-        self.screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
+        self.__screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
         while True:
             # if debug:
             #     self.driver.get_screenshot_as_file(os.path.join(folder_temp_path, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()).__str__() + '.png'))
@@ -91,23 +91,27 @@ class AutomaticCompletion(threading.Thread):
             for x in learn_page_video_iframe:
                 # driver.switch_to.frame(driver.find_elements_by_tag_name(x['name'])[x['index']])
                 self.driver.switch_to.frame(self.driver.find_elements_by_tag_name(x['name'])[x['index']])
-            self.screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
+            self.__screenshot_video(os.path.join(folder_temp_path, str(status % 2) + '.png'))
             if imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png'))) - imagehash.average_hash(Image.open(os.path.join(folder_temp_path, str((status+1) % 2) + '.png'))) != 0:
                 time.sleep(5)
-            elif (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar1).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar1).tobytes()) or \
-                    (Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar2).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar2).tobytes()):
+            elif Image.open(os.path.join(folder_temp_path, str(status % 2) + '.png')).crop(video_progress_bar1).tobytes() != Image.open(os.path.join(folder_temp_path, str((status + 1) % 2) + '.png')).crop(video_progress_bar1).tobytes():
                 time.sleep(5)
             else:
-                self.driver.get_screenshot_as_file(screen_png)
+                self.__screenshot_video(screen_png)
                 i1 = Image.open(screen_png)
                 # 剪切答题提交
-                i2_1 = i1.crop(site_video_test_submit1)
-                i2_2 = i1.crop(site_video_test_submit2)
-                i2_3 = i1.crop(site_video_test_submit3)
+                # 一行title验证
+                i2_1 = i1.crop(location_video_test_submit1_1)
+                # 两行title验证
+                i2_2 = i1.crop(location_video_test_submit2_1)
+                # 三行title验证
+                i2_3 = i1.crop(location_video_test_submit3_1)
+                # i2_2 = i1.crop(site_video_test_submit2)
+                # i2_3 = i1.crop(site_video_test_submit3)
                 # 一行title
-                if (imagehash.average_hash(i2_1) - imagehash.average_hash(Image.open(video_test_submit1_1))) <= 5 or \
-                        (imagehash.average_hash(i2_1) - imagehash.average_hash(Image.open(video_test_submit1_2))) <= 5 or \
-                        (imagehash.average_hash(i2_3) - imagehash.average_hash(Image.open(video_test_submit1_3))) <= 5:
+                if (imagehash.average_hash(i2_1) - imagehash.average_hash(Image.open(video_test_submit1_1))) <= 8:
+                    # (imagehash.average_hash(i2_1) - imagehash.average_hash(Image.open(video_test_submit1_2))) <= 5
+                    # (imagehash.average_hash(i2_3) - imagehash.average_hash(Image.open(video_test_submit1_3))) <= 5:
                     logger.info(log_template, '视频内答题', '一行title', 'Start')
                     # A
                     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 124).click().perform()
@@ -124,24 +128,6 @@ class AutomaticCompletion(threading.Thread):
                     # 继续
                     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 252).click().perform()
                     time.sleep(1)
-                    # self.driver.get_screenshot_as_file(screen_png)
-                    # i1 = Image.open(screen_png)
-                    # 提交后是否正确
-                    # i4_1 = i1.crop(size_video_continue1)
-                    # if (imagehash.average_hash(i4_1) - imagehash.average_hash(Image.open(video_test_continue1))) <= 5:
-                    #     logger.info(log_template, '视频内答题', 'A', 'Right')
-                    #     # 点继续
-                    #     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 252).click().perform()
-                    # else:
-                    #     logger.info(log_template, '视频内答题', 'A', 'Wrong')
-                    #     # 选B
-                    #     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 184).click().perform()
-                    #     time.sleep(1)
-                    #     # 点继续
-                    #     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 252).click().perform()
-                    #     # 点继续
-                    #     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 252).click().perform()
-                    #     logger.info(log_template, '视频内答题', 'B', 'Right')
                 # 两行title
                 elif (imagehash.average_hash(i2_2) - imagehash.average_hash(Image.open(video_test_submit2_1))) <= 5:
                     logger.info(log_template, '视频内答题', '两行title', 'Start')
@@ -179,9 +165,24 @@ class AutomaticCompletion(threading.Thread):
                     #     time.sleep(1)
                     #     # 继续
                     #     ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
-                elif ((imagehash.average_hash(i1.crop(site_video_pause_continue1)) - imagehash.average_hash(Image.open(video_pause_continue1))) <= 5) or\
-                        ((imagehash.average_hash(i1.crop(site_video_pause_continue1)) - imagehash.average_hash(Image.open(video_pause_continue2))) <= 5) or \
-                        ((imagehash.average_hash(i1.crop(site_video_pause_continue2)) - imagehash.average_hash(Image.open(video_pause_continue3))) <= 5):
+                elif (imagehash.average_hash(i2_3) - imagehash.average_hash(Image.open(video_test_submit3_1))) <= 5:
+                    logger.info(log_template, '视频内答题', '三行title', 'Start')
+                    # A
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 167).click().perform()
+                    time.sleep(1)
+                    # 提交
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    time.sleep(1)
+                    # B
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 260, 217).click().perform()
+                    time.sleep(1)
+                    # 提交
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    time.sleep(1)
+                    # 提交
+                    ActionChains(self.driver).move_to_element_with_offset(self.driver.find_element_by_tag_name('object'), 508, 295).click().perform()
+                    time.sleep(1)
+                elif (imagehash.average_hash(i1.crop(location_video_pause_continue1)) - imagehash.average_hash(Image.open(video_pause_continue1))) <= 8:
                     logger.info(log_template, '视频播放', '点击播放按钮', '点击')
                     self.driver.switch_to.default_content()
                     for x in player_iframe:
@@ -345,7 +346,7 @@ class AutomaticCompletion(threading.Thread):
             elif right_or_wrong == 'fr bandui':
                 pass
 
-    def screenshot_video(self, filename):
+    def __screenshot_video(self, filename):
         self.driver.get_screenshot_as_file('tmp.png')
         self.driver.switch_to.default_content()
         for x in learn_page_video_iframe:
