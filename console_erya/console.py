@@ -2,6 +2,9 @@
 import time
 from PIL import Image
 from selenium import webdriver, common
+
+from console_erya.log import *
+from console_erya.questions import query_http_server
 from .config import *
 import os
 from .automaticcompletion import AutomaticCompletion
@@ -169,4 +172,52 @@ class Console:
         elif op == 'send_key':
             self.driver.find_element(by=type_, value=string).clear()
             self.driver.find_element(by=type_, value=string).send_keys(args)
+
+
+class Exam:
+    __select = ''.join([chr(x) for x in range(65, 91)])
+
+    def __init__(self):
+        self.driver = webdriver.Chrome(chrome_drive_path)
+        self.driver.set_window_size(1920, 1080)
+        self.driver.implicitly_wait(timeout)
+        self.driver.get(entrance_url)
+
+    def start(self):
+        self.driver.switch_to.window(self.driver.window_handles[0])
+        a = self.driver.find_element_by_class_name('leftCardChild')
+        typ = [(x, y.text.strip()) for x, y in enumerate(a.find_elements_by_tag_name('h3'))]
+        for index, value in typ:
+            z = 0
+            a = self.driver.find_element_by_class_name('leftCardChild')
+            le = len(a.find_elements_by_tag_name('div')[index].find_elements_by_tag_name('a'))
+            for x in range(0, le):
+                z += 1
+                a = self.driver.find_element_by_class_name('leftCardChild')
+                a.find_elements_by_tag_name('div')[index].find_elements_by_tag_name('a')[x].click()
+                time.sleep(3)
+                title = self.driver.find_element_by_xpath(
+                    '//*[@id="submitTest"]//div[@class="Cy_TItle clearfix"]/div').text.strip().rstrip('分）').rstrip(
+                    '0123456789').rstrip('.').rstrip('0123456789').rstrip('（').strip()
+                last_title = title
+                right_answer = query_http_server(op='query', test_type=value, title=title)
+                logger.info(log_template, '查询', title, 'answer:{0}'.format(str(right_answer)))
+                if value == '判断题':
+                    if right_answer:
+                        self.driver.find_elements_by_xpath('//*[@id="submitTest"]//ul[@class="Cy_ulBottom clearfix"]//li')[0].click()
+                    else:
+                        self.driver.find_elements_by_xpath('//*[@id="submitTest"]//ul[@class="Cy_ulBottom clearfix"]//li')[1].click()
+                elif value in ['单选题', '多选题']:
+                    tag = 0
+                    if right_answer:
+                        for y in self.driver.find_elements_by_xpath('//*[@id="submitTest"]//ul[@class="Cy_ulTop w-top"]/li'):
+                            if y.text.strip().lstrip(self.__select).lstrip('、').strip() in right_answer:
+                                y.click()
+                                tag = 1
+                    if not tag:
+                        logger.error(log_template, str(z)+':'+value, title, '未查到，选择第一项')
+                        self.driver.find_elements_by_xpath('//*[@id="submitTest"]//ul[@class="Cy_ulTop w-top"]/li')[0].click()
+                else:
+                    logger.error(log_template, value, title, '不支持该题型')
+                # time.sleep(15)
 

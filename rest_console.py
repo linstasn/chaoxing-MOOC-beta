@@ -104,9 +104,28 @@ class GetInfo(Resource):
             return [{'status': 404, 'message': '参数错误'}]
 
 
+class RESTExam(Resource):
+    ins = None
+
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('init', type=str, location='args')
+        parser.add_argument('start', type=str, location='args')
+        args = parser.parse_args()
+        if args['init'] is not None:
+            globalvar.add({'exam': console.Exam()})
+            return [{'status': 100, 'message': ''}]
+        elif args['start'] is not None:
+            if globalvar.get('exam'):
+                globalvar.get('exam').start()
+                return [{'status': 100, 'message': ''}]
+        return [{'status': 404, 'message': '参数错误'}]
+
+
 api.add_resource(Main, '/rest_console')
 # 参数待定
 api.add_resource(GetInfo, '/getinfo')
+api.add_resource(RESTExam, '/exam')
 
 
 if __name__ == '__main__':
