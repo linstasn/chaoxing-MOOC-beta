@@ -81,6 +81,9 @@ video_test_submit2_1 = str(Path(getcwd()) / 'templates_pic' / 'submit2_1.png')
 # 视频中间测试提交3_1
 video_test_submit3_1 = str(Path(getcwd()) / 'templates_pic' / 'submit3_1.png')
 
+# 视频中间测试提交1_4四个选项一行title
+video_test_submit1_4 = str(Path(getcwd()) / 'templates_pic' / 'submit1_4.png')
+
 # 视频暂停时开始按钮1(10, 515, 35, 535)
 video_pause_continue1 = str(Path(getcwd()) / 'templates_pic' / 'pause1.png')
 
@@ -98,6 +101,9 @@ location_video_test_submit2_1 = (490, 285, 540, 310)
 
 # 视频内答题 提交 按钮位置3行1
 location_video_test_submit3_1 = (490, 305, 540, 330)
+
+# 视频内答题 提交 按钮位置一行四个选项
+location_video_test_submit1_4 = (490, 350, 540, 380)
 
 # # 视频内答题提交成功后继续按钮位置1
 # location_video_continue1 = (940, 535, 990, 560)
