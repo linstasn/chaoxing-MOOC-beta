@@ -52,6 +52,9 @@ questions_request_update = conf.get('queryHTTP', 'url_update', fallback=False)
 # 微信题库公众号
 wechat_mp = [x for x in conf.get('wechat', 'wechat').split()]
 
+# 未查到答案等待时间
+noanswer_sleep = conf.getint('User', 'noanswer_sleep', fallback=5) if conf.getint('User', 'noanswer_sleep', fallback=5) >= 1 else 5
+
 
 # 开启debug模式(自动截图)
 debug = conf.getboolean('program', 'debug', fallback=False)

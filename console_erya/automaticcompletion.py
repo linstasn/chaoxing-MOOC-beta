@@ -327,13 +327,13 @@ class AutomaticCompletion(threading.Thread):
                             x.click()
                 if not tag:
                     logger.info(log_template, '查询答案失败', 'Title:  ' + title, '随机选择一项')
-                    sleep_time = 60*5
+                    sleep_time = 60*noanswer_sleep
                     # 未搜索到该题目答案，随机选择一项
                     tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('li')[randint(0, len(tmp.find_elements_by_tag_name('ul')[0].find_elements_by_tag_name('li'))-1)].click()
             else:
                 logger.error(log_template, '查询', test_type + '\t暂不支持', '跳过')
         # 提交部分
-        logger.info(log_template, '提交章节测试', '如果有未查到的单/多选题会等待5分钟提交，默认10s后提交', '等待')
+        logger.info(log_template, '提交章节测试', '如果有未查到的单/多选题会等待{0}分钟提交，默认10s后提交'.format(noanswer_sleep.__str__()), '等待')
         time.sleep(sleep_time)
         self.driver.switch_to.default_content()
         for x in test_submit_iframe:
