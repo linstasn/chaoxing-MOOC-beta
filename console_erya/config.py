@@ -87,6 +87,9 @@ video_test_submit3_1 = str(Path(getcwd()) / 'templates_pic' / 'submit3_1.png')
 # 视频中间测试提交1_4四个选项一行title
 video_test_submit1_4 = str(Path(getcwd()) / 'templates_pic' / 'submit1_4.png')
 
+# 视频中间测试提交1_3三个选项一行title
+video_test_submit1_3 = str(Path(getcwd()) / 'templates_pic' / 'submit1_3.png')
+
 # 视频暂停时开始按钮1(10, 515, 35, 535)
 video_pause_continue1 = str(Path(getcwd()) / 'templates_pic' / 'pause1.png')
 
@@ -107,6 +110,9 @@ location_video_test_submit3_1 = (490, 305, 540, 330)
 
 # 视频内答题 提交 按钮位置一行四个选项
 location_video_test_submit1_4 = (490, 350, 540, 380)
+
+# 视频内答题 提交 按钮位置一行三个选项
+location_video_test_submit1_3 = (490, 300, 540, 330)
 
 # # 视频内答题提交成功后继续按钮位置1
 # location_video_continue1 = (940, 535, 990, 560)
@@ -449,6 +455,6 @@ lesson_name = {
 
 # 学习页面未完成课程
 not_completed_lesson = {
-    'type': 'string',
+    'type': 'xpath',
     'string': ['//div[@class="ncells"]/a//span[@class="roundpointStudent  orange01 a002"]', '//div[@class="ncells"]/a//span[@class="roundpoint  orange01"]']
 }
