@@ -23,18 +23,17 @@ class AutomaticCompletion(threading.Thread):
         threading.Thread.__init__(self)
         # self.course_lesson = course_lesson
         self.driver = driver
-        self.xpath = ['//div[@class="ncells"]/a//span[@class="roundpointStudent  orange01 a002"]', '//div[@class="ncells"]/a//span[@class="roundpoint  orange01"]']
 
     def run(self):
         last_lesson = None
-        for x in self.xpath:
+        for x in not_completed_lesson['string']:
             while True:
                 try:
                     self.driver.switch_to.default_content()
                     # self.driver.find_element('xpath', x).click()
-                    ActionChains(self.driver).click(self.driver.find_element('xpath', x)).perform()
+                    ActionChains(self.driver).click(self.driver.find_element(not_completed_lesson['type'], x)).perform()
                     time.sleep(5)
-                    if last_lesson == self.driver.find_element('xpath', '//div[@id="mainid"]/h1').text:
+                    if last_lesson == self.driver.find_element(lesson_name['type'], lesson_name['string']).text:
                         logger.error(log_template, '出错', '无法检测视频状态，手动观看【{0}】,输入y确认已完成观看'.format(last_lesson), '结束刷课')
                         while True:
                             if input('是否已手动观看完成？(y)').strip() == 'y':
@@ -253,12 +252,6 @@ class AutomaticCompletion(threading.Thread):
         return True
 
     def __answer(self):
-        # self.driver.switch_to.window(self.driver.window_handles[0])
-        # self.driver.execute_script(self.__js.format(lesson))
-        # for x in self.driver.window_handles:
-        #     self.driver.switch_to.window(x)
-        #     if x == learn_page_title:
-        #         break
         sleep_time = 10
         self.driver.switch_to.default_content()
         # 章节测试答题部分

@@ -33,7 +33,7 @@ class Console:
         }
         options = webdriver.ChromeOptions()
         # options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
+        # options.add_argument('--disable-gpu')
         options.add_experimental_option("prefs", prefs)
         self.driver = webdriver.Chrome(chrome_drive_path, chrome_options=options)
         self.driver.implicitly_wait(timeout)
@@ -45,10 +45,13 @@ class Console:
         self.driver.quit()
 
     def login(self, student_num, password, code):
-        self.operate(login_code['type'], login_code['string'], 'send_key', code)
-        self.operate(login_username['type'], login_username['string'], 'send_key', student_num)
-        self.operate(login_password['type'], login_password['string'], 'send_key', password)
-        self.operate(login_button['type'], login_button['string'], 'click')
+        self.driver.find_element(login_code['type'], login_code['string']).clear()
+        self.driver.find_element(login_code['type'], login_code['string']).send_keys(code)
+        self.driver.find_element(login_username['type'], login_username['string']).clear()
+        self.driver.find_element(login_username['type'], login_username['string']).send_keys(student_num)
+        self.driver.find_element(login_password['type'], login_password['string']).clear()
+        self.driver.find_element(login_password['type'], login_password['string']).send_keys(password)
+        self.driver.find_element(login_button['type'], login_button['string']).click()
         try:
             name = self.driver.find_element(login_ver['type'], login_ver['string']).text
         except common.exceptions.NoSuchElementException:
@@ -158,20 +161,20 @@ class Console:
         self.status['browser_watch'] = 1
         return True
 
-    def operate(self, type_, string, op, args=None):
-        """
-        部分点击、输入等操作
-        :param type_:
-        :param string:
-        :param op:
-        :param args:
-        :return:
-        """
-        if op == 'click':
-            self.driver.find_element(by=type_, value=string).click()
-        elif op == 'send_key':
-            self.driver.find_element(by=type_, value=string).clear()
-            self.driver.find_element(by=type_, value=string).send_keys(args)
+    # def operate(self, type_, string, op, args=None):
+    #     """
+    #     部分点击、输入等操作
+    #     :param type_:
+    #     :param string:
+    #     :param op:
+    #     :param args:
+    #     :return:
+    #     """
+    #     if op == 'click':
+    #         self.driver.find_element(by=type_, value=string).click()
+    #     elif op == 'send_key':
+    #         self.driver.find_element(by=type_, value=string).clear()
+    #         self.driver.find_element(by=type_, value=string).send_keys(args)
 
 
 class Exam:

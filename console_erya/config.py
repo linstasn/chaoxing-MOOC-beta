@@ -440,3 +440,15 @@ first_lesson = {
     'string': '//div[@class="leveltwo"]//span[@class="articlename"]',
     # 'string': '/html/body/div[7]/div[1]/div[2]/div[3]/div[1]/div[1]/h3/span[2]/a'
 }
+
+# 课程名称
+lesson_name = {
+    'type': 'xpath',
+    'string': '//div[@id="mainid"]/h1'
+}
+
+# 学习页面未完成课程
+not_completed_lesson = {
+    'type': 'string',
+    'string': ['//div[@class="ncells"]/a//span[@class="roundpointStudent  orange01 a002"]', '//div[@class="ncells"]/a//span[@class="roundpoint  orange01"]']
+}
